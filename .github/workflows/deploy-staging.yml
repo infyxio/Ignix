@@ -1,0 +1,37 @@
+name: Deploy to Shopify (Main after Staging Merge)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Shopify Theme to Staging (Ignix)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli @shopify/theme
+
+      - name: Deploy to Shopify Store
+        env:
+          SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN }}
+          SHOPIFY_SHOP: ${{ secrets.SHOPIFY_SHOP }}
+          SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_THEME_ID }}
+        run: |
+          echo "Deploying to Shopify Store: $SHOPIFY_SHOP"
+          shopify theme push \
+            --theme $SHOPIFY_THEME_ID \
+            --store $SHOPIFY_SHOP \
+            --password $SHOPIFY_CLI_THEME_TOKEN \
+            --allow-live \
+            --nodelete
